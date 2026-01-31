@@ -1,0 +1,39 @@
+name: Convert Law Docx to JSON
+
+on:
+  push:
+    paths:
+      - '**.docx'  # Triggers only when a .docx file is pushed
+  workflow_dispatch: # Allows you to run it manually from the "Actions" tab
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install python-docx
+
+      - name: Run converter
+        run: |
+          # This runs your script. 
+          # Ensure converter.py is configured to look for your filename
+          python converter.py
+
+      - name: Commit and Push JSON
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add *.json
+          # Only commit if there are changes to avoid errors
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-converted DOCX to JSON"
+          git push
